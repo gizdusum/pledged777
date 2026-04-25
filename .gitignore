@@ -1,0 +1,9 @@
+.env
+.env.local
+RitualKey*
+cache/
+out/
+broadcast/
+node_modules/
+.next/
+.DS_Store

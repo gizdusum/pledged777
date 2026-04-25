@@ -1,0 +1,26 @@
+{
+  "name": "pledged",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "compile:contracts": "forge build",
+    "deploy:ritual": "forge create --broadcast --rpc-url $RITUAL_RPC_URL --private-key $PRIVATE_KEY contracts/PledgedGenesis.sol:PledgedGenesis --constructor-args $FOUNDER_HANDLE $FOUNDER_PROOF_HASH $FOUNDER_SCORE"
+  },
+  "dependencies": {
+    "next": "^16.2.4",
+    "postcss": "^8.5.10",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.5.4"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
+  }
+}
