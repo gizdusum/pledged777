@@ -19,7 +19,7 @@ html {
 
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100svh;
   background:
     linear-gradient(135deg, var(--green-dark), var(--green) 58%, #0b382c);
   color: var(--ink);
@@ -32,18 +32,19 @@ a {
 }
 
 .shell {
-  width: min(1160px, calc(100% - 32px));
+  width: min(1180px, calc(100% - 28px));
   margin: 0 auto;
-  padding: 28px 0 56px;
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+  padding: 18px 0;
 }
 
 .hero {
-  min-height: calc(100vh - 210px);
   display: grid;
-  grid-template-columns: minmax(260px, 0.65fr) minmax(0, 1fr);
+  grid-template-columns: minmax(180px, 0.5fr) minmax(0, 1fr) minmax(280px, 0.62fr);
   align-items: center;
-  gap: 48px;
-  padding: 28px 0 24px;
+  gap: 28px;
 }
 
 .identity {
@@ -53,7 +54,7 @@ a {
 }
 
 .logoFrame {
-  width: min(72vw, 360px);
+  width: min(24vw, 260px);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -80,7 +81,7 @@ a {
 }
 
 .heroCopy {
-  max-width: 650px;
+  max-width: 620px;
 }
 
 h1,
@@ -91,8 +92,8 @@ p {
 }
 
 h1 {
-  margin-bottom: 22px;
-  font-size: clamp(3rem, 6.4vw, 6.1rem);
+  margin-bottom: 18px;
+  font-size: clamp(3.2rem, 6.2vw, 5.8rem);
   line-height: 0.92;
   letter-spacing: 0;
 }
@@ -112,15 +113,16 @@ h3 {
 .lede {
   max-width: 610px;
   color: var(--muted);
-  font-size: 1.08rem;
-  line-height: 1.7;
+  font-size: 1rem;
+  line-height: 1.55;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 32px;
+  align-items: center;
+  margin-top: 20px;
 }
 
 .primary,
@@ -143,52 +145,41 @@ h3 {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.statusBand {
+.proofNote {
+  max-width: 260px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.statusGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  background: var(--line);
 }
 
-.statusBand div {
+.statusGrid div {
   min-width: 0;
-  padding: 18px;
-  border-right: 1px solid var(--line);
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.statusBand div:last-child {
-  border-right: 0;
-}
-
-.statusBand span,
-.boardHeader span {
+.statusGrid span {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--muted);
   font-size: 0.8rem;
 }
 
-.statusBand strong {
+.statusGrid strong {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 1rem;
-}
-
-.truth {
-  max-width: 760px;
-  padding: 64px 0 44px;
-}
-
-.truth p {
-  color: var(--muted);
-  font-size: 1.04rem;
-  line-height: 1.7;
-}
-
-code {
-  color: var(--ink);
+  font-size: 0.92rem;
 }
 
 .row {
@@ -196,29 +187,25 @@ code {
   line-height: 1.55;
 }
 
-.leaderboard {
-  padding: 34px 0 0;
-}
-
-.boardHeader {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 18px;
+.sidePanel {
+  min-width: 0;
+  border-left: 1px solid var(--line);
+  padding-left: 24px;
 }
 
 .rows {
+  margin-top: 14px;
   border-top: 1px solid var(--line);
 }
 
 .row {
   display: grid;
-  grid-template-columns: 86px minmax(120px, 1fr) minmax(160px, 1.4fr) 72px;
-  gap: 12px;
+  grid-template-columns: 64px minmax(80px, 1fr) minmax(100px, 1.1fr) 48px;
+  gap: 10px;
   align-items: center;
-  min-height: 58px;
+  min-height: 46px;
   border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
 }
 
 .row strong,
@@ -230,10 +217,11 @@ code {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 54px;
-  padding-top: 24px;
+  margin-top: 28px;
+  padding-top: 18px;
   border-top: 1px solid var(--line);
   color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .footer a {
@@ -256,13 +244,28 @@ code {
     grid-template-columns: 1fr;
   }
 
-  .hero {
-    min-height: auto;
-    gap: 30px;
+  .shell {
+    align-items: start;
+    padding: 18px 0 28px;
   }
 
-  .statusBand {
-    grid-template-columns: 1fr 1fr;
+  .hero {
+    gap: 24px;
+  }
+
+  .identity {
+    place-items: start;
+  }
+
+  .logoFrame {
+    width: min(54vw, 180px);
+  }
+
+  .sidePanel {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
   }
 
   h1 {
@@ -273,20 +276,10 @@ code {
 @media (max-width: 620px) {
   .shell {
     width: min(100% - 22px, 1160px);
-    padding-top: 14px;
   }
 
-  .statusBand {
+  .statusGrid {
     grid-template-columns: 1fr;
-  }
-
-  .statusBand div {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .statusBand div:last-child {
-    border-bottom: 0;
   }
 
   .row {

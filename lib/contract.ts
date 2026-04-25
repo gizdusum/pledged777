@@ -4,7 +4,7 @@ export const pledgedGenesis = {
   currency: "RITUAL",
   rpcUrl: "https://rpc.ritualfoundation.org",
   explorerUrl: "https://explorer.ritualfoundation.org",
-  address: "0x9B593305EdA37ff4a274c481AeDe1860ccB532eC",
+  address: "0x550ba09dE08Fa55EEB3a1b4D6c0B1DDb0cA34437",
   founderHandle: "gizdusum",
-  maxGenesis: 777,
+  maxGenesis: 333,
 };

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 contract PledgedGenesis {
-    uint256 public constant MAX_GENESIS = 777;
+    uint256 public constant MAX_GENESIS = 333;
     uint256 public totalMembers;
     address public owner;
 

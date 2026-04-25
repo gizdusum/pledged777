@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pledged Genesis",
-  description: "A gasless Ritual Genesis list for the first 777 pledged contributors.",
+  title: "Pledged Genesis Block",
+  description: "A gasless Ritual Genesis registry for the first 333 pledged contributors.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
