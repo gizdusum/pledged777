@@ -36,6 +36,7 @@ a {
   margin: 0 auto;
   min-height: 100svh;
   display: grid;
+  grid-template-rows: 1fr auto;
   align-items: center;
   padding: 18px 0;
 }
@@ -193,6 +194,69 @@ h3 {
   padding-left: 24px;
 }
 
+.pledgeConsole {
+  display: grid;
+  gap: 12px;
+}
+
+.consoleSteps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.consoleButton {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--ink);
+  color: var(--green-dark);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+}
+
+.consoleButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+}
+
+.consoleStatus {
+  min-height: 40px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.onchainReceipt {
+  display: grid;
+  gap: 5px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.onchainReceipt span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.onchainReceipt strong,
+.onchainReceipt a {
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.listEyebrow {
+  margin-top: 24px;
+}
+
 .rows {
   margin-top: 14px;
   border-top: 1px solid var(--line);
@@ -216,10 +280,9 @@ h3 {
 .footer {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 14px;
-  margin-top: 28px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
+  padding-top: 16px;
   color: var(--muted);
   font-size: 0.92rem;
 }
@@ -246,7 +309,7 @@ h3 {
 
   .shell {
     align-items: start;
-    padding: 18px 0 28px;
+    padding: 18px 0 24px;
   }
 
   .hero {
@@ -268,6 +331,10 @@ h3 {
     padding-top: 20px;
   }
 
+  .footer {
+    margin-top: 24px;
+  }
+
   h1 {
     font-size: clamp(2.8rem, 14vw, 5rem);
   }
@@ -279,6 +346,10 @@ h3 {
   }
 
   .statusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .consoleSteps {
     grid-template-columns: 1fr;
   }
 
