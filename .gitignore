@@ -1,9 +1,13 @@
 .env
 .env.local
 RitualKey*
+Private Key*
+private key*
+*.rtf
 cache/
 out/
 broadcast/
 node_modules/
 .next/
 .DS_Store
+lib/forge-std

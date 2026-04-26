@@ -3,102 +3,85 @@ import {
   createWalletClient,
   http,
   isAddress,
-  keccak256,
-  stringToBytes,
   verifyMessage,
   type Address,
   type Hex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { pledgedGenesis } from "@/lib/contract";
+import { pledged777, pledged777Abi } from "@/lib/contract";
 import { buildPledgeMessage } from "@/lib/pledge";
 
-const pledgedAbi = [
-  {
-    type: "function",
-    name: "pledge",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "wallet", type: "address" },
-      { name: "handle", type: "string" },
-      { name: "proofHash", type: "bytes32" },
-      { name: "score", type: "uint96" },
-    ],
-    outputs: [],
-  },
-] as const;
-
 const ritualTestnet = {
-  id: pledgedGenesis.chainId,
-  name: pledgedGenesis.chainName,
-  nativeCurrency: {
-    decimals: 18,
-    name: pledgedGenesis.currency,
-    symbol: pledgedGenesis.currency,
-  },
-  rpcUrls: {
-    default: { http: [pledgedGenesis.rpcUrl] },
-  },
-};
+  id: pledged777.chainId,
+  name: pledged777.chainName,
+  nativeCurrency: { decimals: 18, name: pledged777.currency, symbol: pledged777.currency },
+  rpcUrls: { default: { http: [pledged777.rpcUrl] } },
+} as const;
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     address?: string;
     signature?: string;
+    imageUri?: string;
+    message?: string;
   } | null;
 
-  const address = body?.address;
-  const signature = body?.signature;
+  const { address, signature, imageUri, message } = body ?? {};
 
   if (!address || !isAddress(address) || !signature) {
-    return NextResponse.json({ error: "Invalid pledge payload." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
+  }
+  if (!imageUri || !imageUri.startsWith("data:image/")) {
+    return NextResponse.json({ error: "Invalid image." }, { status: 400 });
+  }
+  if (!message || typeof message !== "string") {
+    return NextResponse.json({ error: "Message required." }, { status: 400 });
+  }
+  if (Buffer.byteLength(message, "utf8") > 77) {
+    return NextResponse.json({ error: "Message exceeds 77 characters." }, { status: 400 });
+  }
+  if (Buffer.byteLength(imageUri, "utf8") > 1500) {
+    return NextResponse.json({ error: "Image data too large." }, { status: 400 });
   }
 
-  const message = buildPledgeMessage(address);
+  const pledgeMsg = buildPledgeMessage(address);
   const isValid = await verifyMessage({
     address: address as Address,
-    message,
+    message: pledgeMsg,
     signature: signature as Hex,
   });
 
   if (!isValid) {
-    return NextResponse.json({ error: "Signature does not match the connected wallet." }, { status: 401 });
+    return NextResponse.json({ error: "Signature does not match wallet." }, { status: 401 });
   }
 
-  const privateKey = process.env.RELAYER_PRIVATE_KEY ?? process.env.PRIVATE_KEY;
-  if (!privateKey) {
-    return NextResponse.json(
-      {
-        error: "Relayer is not configured yet.",
-        readyForRelayer: true,
-      },
-      { status: 503 }
-    );
+  const rawKey = process.env.RELAYER_PRIVATE_KEY ?? process.env.PRIVATE_KEY;
+  if (!rawKey) {
+    return NextResponse.json({ error: "Relayer not configured." }, { status: 503 });
   }
 
-  const normalizedKey = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
-  const account = privateKeyToAccount(normalizedKey as Hex);
+  const privateKey = rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`;
+  const account = privateKeyToAccount(privateKey as Hex);
   const client = createWalletClient({
     account,
     chain: ritualTestnet,
-    transport: http(process.env.RITUAL_RPC_URL ?? pledgedGenesis.rpcUrl),
+    transport: http(process.env.RITUAL_RPC_URL ?? pledged777.rpcUrl),
   });
 
-  const proofHash = keccak256(stringToBytes(`${pledgedGenesis.address}:${address}:${signature}`));
   try {
     const txHash = await client.writeContract({
-      address: pledgedGenesis.address as Address,
-      abi: pledgedAbi,
+      address: pledged777.address as Address,
+      abi: pledged777Abi,
       functionName: "pledge",
-      args: [address as Address, "Genesis member", proofHash, BigInt(100)],
+      args: [address as Address, imageUri, message],
     });
 
     return NextResponse.json({
       txHash,
-      explorerUrl: `${pledgedGenesis.explorerUrl}/tx/${txHash}`,
+      explorerUrl: `${pledged777.explorerUrl}/tx/${txHash}`,
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Relayer transaction failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Relayer transaction failed.";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

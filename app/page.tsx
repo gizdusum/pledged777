@@ -1,93 +1,128 @@
-import Image from "next/image";
+import { createPublicClient, http } from "viem";
 import PledgeConsole from "./PledgeConsole";
-import { pledgedGenesis } from "@/lib/contract";
+import { pledged777, pledged777Abi } from "@/lib/contract";
 
-const sampleMembers = [
-  { rank: 1, handle: pledgedGenesis.founderHandle, score: 100, status: "Founder trace" },
-  { rank: 2, handle: "Open", score: 0, status: "Agent trial pending" },
-  { rank: 3, handle: "Open", score: 0, status: "Agent trial pending" },
-];
+const ritualChain = {
+  id: pledged777.chainId,
+  name: pledged777.chainName,
+  nativeCurrency: { decimals: 18, name: pledged777.currency, symbol: pledged777.currency },
+  rpcUrls: { default: { http: [pledged777.rpcUrl] } },
+} as const;
 
-export default function Home() {
-  const explorerHref =
-    pledgedGenesis.address === "DEPLOY_PENDING"
-      ? pledgedGenesis.explorerUrl
-      : `${pledgedGenesis.explorerUrl}/address/${pledgedGenesis.address}`;
+async function fetchRecentPledges() {
+  try {
+    const client = createPublicClient({ chain: ritualChain, transport: http() });
+    const total = await client.readContract({
+      address: pledged777.address as `0x${string}`,
+      abi: pledged777Abi,
+      functionName: "totalPledged",
+    });
+    const count = Number(total);
+    if (count === 0) return { total: 0, recent: [] };
+    const startRank = Math.max(1, count - 4);
+    const limit = count - startRank + 1;
+    const pledges = await client.readContract({
+      address: pledged777.address as `0x${string}`,
+      abi: pledged777Abi,
+      functionName: "getPledges",
+      args: [BigInt(startRank), BigInt(limit)],
+    });
+    return { total: count, recent: [...pledges].reverse() };
+  } catch {
+    return { total: 0, recent: [] };
+  }
+}
+
+function shortenAddr(addr: string) {
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
+export default async function Home() {
+  const { total, recent } = await fetchRecentPledges();
+  const remaining = pledged777.maxPledges - total;
 
   return (
-    <main className="shell">
-      <section className="hero">
-        <div className="identity">
-          <div className="logoFrame" aria-label="Ritual logo">
-            <Image src="/ritual-logo.jpg" alt="Ritual" width={400} height={400} priority />
-          </div>
-        </div>
+    <div className="shell">
+      <nav className="nav">
+        <span className="navBrand">PLEDGED_777</span>
+        <ul className="navLinks">
+          <li><a href="/genesis">Genesis List</a></li>
+          <li><a href="/chain">Chain</a></li>
+          <li><a href={pledged777.explorerUrl} target="_blank" rel="noreferrer">Explorer</a></li>
+        </ul>
+      </nav>
 
-        <div className="heroCopy">
-          <p className="eyebrow">Ritual Genesis Block</p>
-          <h1>Pledged opens 333 on-chain seats.</h1>
-          <p className="lede">
-            Connect your wallet, sign a free pledge, and the relayer writes your wallet,
-            score, proof hash, and rank to Ritual Testnet. You leave a real on-chain trace
-            without holding test tokens.
-          </p>
-          <div className="statusGrid" aria-label="Genesis status">
-            <div>
-              <span>Seats</span>
-              <strong>1 / {pledgedGenesis.maxGenesis}</strong>
-            </div>
-            <div>
-              <span>Entry</span>
-              <strong>Gasless relayed tx</strong>
-            </div>
-            <div>
-              <span>Network</span>
-              <strong>Ritual Testnet</strong>
-            </div>
-            <div>
-              <span>Registry</span>
-              <strong>{pledgedGenesis.address}</strong>
-            </div>
-          </div>
+      <main>
+        <section className="hero">
+          <div className="heroLeft">
+            <span className="label">Ritual Testnet · Chain {pledged777.chainId}</span>
+            <h1>777<br />on-chain<br />pledges.</h1>
+            <p className="lede">
+              Connect your wallet, upload an image, leave a message.
+              The relayer writes it permanently to Ritual Testnet —
+              your wallet address lives on the blockchain forever.
+            </p>
 
-          <div className="actions">
-            <a href={explorerHref} target="_blank" rel="noreferrer" className="primary">
-              View registry
-            </a>
-            <span className="proofNote">The relayer pays gas; the contract stores the user wallet.</span>
-          </div>
-        </div>
-
-        <aside className="sidePanel">
-          <PledgeConsole />
-
-          <p className="eyebrow listEyebrow">Genesis list</p>
-          <div className="rows">
-            {sampleMembers.map((member) => (
-              <div className="row" key={member.rank}>
-                <strong>#{member.rank.toString().padStart(3, "0")}</strong>
-                <span>{member.handle}</span>
-                <span>{member.status}</span>
-                <b>{member.score || "--"}</b>
+            <div className="statsGrid">
+              <div className="statCell">
+                <span>Pledged</span>
+                <strong className="big">{total}</strong>
               </div>
-            ))}
+              <div className="statCell">
+                <span>Remaining</span>
+                <strong className="big">{remaining}</strong>
+              </div>
+              <div className="statCell">
+                <span>Network</span>
+                <strong>Ritual Testnet</strong>
+              </div>
+              <div className="statCell">
+                <span>Contract</span>
+                <strong>
+                  <a href={`${pledged777.explorerUrl}/address/${pledged777.address}`} target="_blank" rel="noreferrer">
+                    {pledged777.address.slice(0, 10)}…
+                  </a>
+                </strong>
+              </div>
+            </div>
+
+            {recent.length > 0 && (
+              <>
+                <p className="recentTitle">// recent pledges</p>
+                {recent.map((p) => (
+                  <div className="pledgeRow" key={p.rank}>
+                    <span className="pledgeRank">#{String(p.rank).padStart(3, "0")}</span>
+                    {p.imageUri ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.imageUri} alt="" className="pledgeThumb" />
+                    ) : (
+                      <div className="pledgeThumb" style={{ background: "var(--bg3)", display: "grid", placeItems: "center", color: "var(--dim)", fontSize: "0.7rem" }}>?</div>
+                    )}
+                    <div className="pledgeInfo">
+                      <p className="pledgeWallet">{shortenAddr(p.wallet)}</p>
+                      <p className="pledgeMsg">{p.message || "—"}</p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
-        </aside>
-      </section>
+
+          <aside>
+            <PledgeConsole />
+          </aside>
+        </section>
+      </main>
 
       <footer className="footer">
-        <span>Built by gizdusum</span>
-        <a href="https://x.com/gizdusumandnode" target="_blank" rel="noreferrer" aria-label="X profile">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M18.2 2.25h3.3l-7.2 8.23 8.47 11.27h-6.63l-5.2-6.84-5.95 6.84H1.68l7.72-8.86L1.27 2.25H8.1l4.7 6.26 5.4-6.26Zm-1.15 17.52h1.83L7.1 4.13H5.14l11.91 15.64Z" />
-          </svg>
-        </a>
-        <a href="https://github.com/gizdusum" target="_blank" rel="noreferrer" aria-label="GitHub profile">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.9c-2.78.62-3.37-1.22-3.37-1.22-.45-1.19-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.56 2.35 1.11 2.92.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.32 9.32 0 0 1 12 6.97c.85 0 1.7.12 2.5.34 1.9-1.33 2.74-1.05 2.74-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.59.69.49A10.2 10.2 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
-          </svg>
-        </a>
+        <span>PLEDGED_777 · Ritual Testnet Genesis</span>
+        <div className="footerLinks">
+          <span>built by</span>
+          <a href="https://x.com/gizdusumandnode" target="_blank" rel="noreferrer" aria-label="X">
+            <svg className="footerSvg" viewBox="0 0 24 24"><path d="M18.2 2.25h3.3l-7.2 8.23 8.47 11.27h-6.63l-5.2-6.84-5.95 6.84H1.68l7.72-8.86L1.27 2.25H8.1l4.7 6.26 5.4-6.26Zm-1.15 17.52h1.83L7.1 4.13H5.14l11.91 15.64Z"/></svg>
+          </a>
+        </div>
       </footer>
-    </main>
+    </div>
   );
 }

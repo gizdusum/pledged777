@@ -1,11 +1,14 @@
-import { pledgedGenesis } from "./contract";
+import { pledged777 } from "./contract";
 
-export function buildPledgeMessage(address: string) {
+export function buildPledgeMessage(address: string): string {
   return [
-    "Pledged Genesis Block",
+    "PLEDGED 777 — Ritual Testnet Genesis",
+    "",
     `Wallet: ${address}`,
-    `Registry: ${pledgedGenesis.address}`,
-    `Network: ${pledgedGenesis.chainName}`,
-    "Action: Request gasless on-chain pledge",
+    `Contract: ${pledged777.address}`,
+    `Chain: ${pledged777.chainName} (${pledged777.chainId})`,
+    "",
+    "I am claiming my permanent on-chain slot.",
+    "This signature authorizes the relayer to write my pledge to the blockchain.",
   ].join("\n");
 }
