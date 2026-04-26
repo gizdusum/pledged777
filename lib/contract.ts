@@ -6,7 +6,7 @@ export const pledged777 = {
   explorerUrl: "https://explorer.ritualfoundation.org",
   faucetUrl: "https://faucet.ritualfoundation.org",
   docsUrl: "https://docs.ritualfoundation.org",
-  address: "0xB7142038aCde47288772591E9000fd1ECdFF42D7",
+  address: "0x0967fa38C8Cdcb7f245889F53956Cf0a58D9f261",
   maxPledges: 777,
 } as const;
 
@@ -78,6 +78,13 @@ export const pledged777Abi = [
     stateMutability: "view",
     inputs: [{ name: "", type: "address" }],
     outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "adminClearPledge",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "rank", type: "uint256" }],
+    outputs: [],
   },
   // ─── ERC-721 reads ─────────────────────────────────────────────────────────
   {

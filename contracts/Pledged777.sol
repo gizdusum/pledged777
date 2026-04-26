@@ -91,6 +91,14 @@ contract Pledged777 {
         emit Transfer(address(0), to, tokenId);
     }
 
+    function _burn(uint256 tokenId) internal {
+        address tokenOwner = _owners[tokenId];
+        _tokenApprovals[tokenId] = address(0);
+        unchecked { _balances[tokenOwner]--; }
+        _owners[tokenId] = address(0);
+        emit Transfer(tokenOwner, address(0), tokenId);
+    }
+
     // ─── Base64 ───────────────────────────────────────────────────────────────
 
     bytes private constant _B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -237,6 +245,18 @@ contract Pledged777 {
 
         _mint(wallet, rank);
         emit Pledged(wallet, rank, message, uint64(block.timestamp));
+    }
+
+    function adminClearPledge(uint256 rank) external onlyOwner {
+        Pledge storage p = pledgeByRank[rank];
+        address wallet = p.wallet;
+        if (wallet == address(0)) revert InvalidWallet();
+
+        hasPledged[wallet] = false;
+        delete pledgeByRank[rank];
+        _burn(rank);
+
+        if (rank == totalPledged) totalPledged--;
     }
 
     function transferOwnership(address newOwner) external onlyOwner {
