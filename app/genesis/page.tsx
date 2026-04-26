@@ -1,4 +1,5 @@
 import { createPublicClient, http } from "viem";
+import Footer from "../Footer";
 import { pledged777, pledged777Abi } from "@/lib/contract";
 
 const ritualChain = {
@@ -49,7 +50,7 @@ export default async function GenesisPage() {
   return (
     <div className="shell">
       <nav className="nav">
-        <span className="navBrand"><a href="/">PLEDGED_777</a></span>
+        <span className="navBrand"><a href="/">PLEDGED 777</a></span>
         <ul className="navLinks">
           <li><a href="/genesis">Genesis List</a></li>
           <li><a href="/chain">Chain</a></li>
@@ -108,12 +109,7 @@ export default async function GenesisPage() {
         )}
       </main>
 
-      <footer className="footer">
-        <span>PLEDGED_777 · Ritual Testnet</span>
-        <div className="footerLinks">
-          <a href="/">← Back</a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -11,3 +11,4 @@ node_modules/
 .next/
 .DS_Store
 lib/forge-std
+.vercel

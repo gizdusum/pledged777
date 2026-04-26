@@ -1,5 +1,7 @@
+import Image from "next/image";
 import { createPublicClient, http } from "viem";
 import PledgeConsole from "./PledgeConsole";
+import Footer from "./Footer";
 import { pledged777, pledged777Abi } from "@/lib/contract";
 
 const ritualChain = {
@@ -44,7 +46,7 @@ export default async function Home() {
   return (
     <div className="shell">
       <nav className="nav">
-        <span className="navBrand">PLEDGED_777</span>
+        <span className="navBrand">PLEDGED 777</span>
         <ul className="navLinks">
           <li><a href="/genesis">Genesis List</a></li>
           <li><a href="/chain">Chain</a></li>
@@ -55,12 +57,16 @@ export default async function Home() {
       <main>
         <section className="hero">
           <div className="heroLeft">
+            <div className="logoWrap">
+              <Image src="/logo.jpg" alt="Pledged 777" fill className="logoImg" priority />
+            </div>
+
             <span className="label">Ritual Testnet · Chain {pledged777.chainId}</span>
             <h1>777<br />on-chain<br />pledges.</h1>
             <p className="lede">
               Connect your wallet, upload an image, leave a message.
               The relayer writes it permanently to Ritual Testnet —
-              your wallet address lives on the blockchain forever.
+              your wallet lives on the blockchain forever.
             </p>
 
             <div className="statsGrid">
@@ -114,15 +120,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="footer">
-        <span>PLEDGED_777 · Ritual Testnet Genesis</span>
-        <div className="footerLinks">
-          <span>built by</span>
-          <a href="https://x.com/gizdusumandnode" target="_blank" rel="noreferrer" aria-label="X">
-            <svg className="footerSvg" viewBox="0 0 24 24"><path d="M18.2 2.25h3.3l-7.2 8.23 8.47 11.27h-6.63l-5.2-6.84-5.95 6.84H1.68l7.72-8.86L1.27 2.25H8.1l4.7 6.26 5.4-6.26Zm-1.15 17.52h1.83L7.1 4.13H5.14l11.91 15.64Z"/></svg>
-          </a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
