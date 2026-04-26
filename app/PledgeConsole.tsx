@@ -117,8 +117,19 @@ export default function PledgeConsole() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address, signature: sig, imageUri, message }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Relayer error.");
+
+      // Always parse as text first — handles empty / non-JSON server errors
+      const rawText = await res.text();
+      if (!rawText.trim()) {
+        throw new Error(`Server returned empty response (HTTP ${res.status}). Please try again.`);
+      }
+      let data: Record<string, string> = {};
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(`Unexpected server response (${res.status}): ${rawText.slice(0, 120)}`);
+      }
+      if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
 
       setTxHash(data.txHash);
       setTxUrl(data.explorerUrl);

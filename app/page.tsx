@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { createPublicClient, http } from "viem";
 import PledgeConsole from "./PledgeConsole";
+import MatrixLogo from "./MatrixLogo";
 import Footer from "./Footer";
 import { pledged777, pledged777Abi } from "@/lib/contract";
 
@@ -11,7 +11,7 @@ const ritualChain = {
   rpcUrls: { default: { http: [pledged777.rpcUrl] } },
 } as const;
 
-async function fetchStats() {
+async function fetchTotal() {
   try {
     const client = createPublicClient({ chain: ritualChain, transport: http() });
     const total = await client.readContract({
@@ -24,7 +24,7 @@ async function fetchStats() {
 }
 
 export default async function Home() {
-  const total = await fetchStats();
+  const total = await fetchTotal();
   const remaining = pledged777.maxPledges - total;
 
   return (
@@ -40,40 +40,31 @@ export default async function Home() {
 
       <main className="heroMain">
         <section className="hero">
-          {/* Left column */}
+          {/* Left */}
           <div className="heroLeft">
-            <div className="logoWrap">
-              <Image src="/logo.jpg" alt="Pledged 777" fill className="logoImg" priority />
+            <MatrixLogo />
+
+            <div className="heroText">
+              <h1 className="heroTitle">777<br />Pledges.</h1>
+              <p className="heroSub">Promised and bound to the Ritual chain. Forever.</p>
             </div>
 
-            <h1>
-              777 Pledges.<br />
-              Promised and Bound<br />
-              to the Ritual Chain<br />
-              Forever.
-            </h1>
-
-            <div className="heroStats">
-              <div className="heroStat">
+            <div className="heroMeta">
+              <div className="metaItem">
                 <strong>{total}</strong>
                 <span>Pledged</span>
               </div>
-              <div className="heroStatDiv" />
-              <div className="heroStat">
+              <div className="metaDot" />
+              <div className="metaItem">
                 <strong>{remaining}</strong>
-                <span>Remaining</span>
+                <span>Open</span>
               </div>
-              <div className="heroStatDiv" />
-              <div className="heroStat">
-                <strong>Ritual Testnet</strong>
-                <span>Network</span>
-              </div>
-              <div className="heroStatDiv" />
-              <div className="heroStat">
+              <div className="metaDot" />
+              <div className="metaItem">
                 <strong>
                   <a href={`${pledged777.explorerUrl}/address/${pledged777.address}`}
-                    target="_blank" rel="noreferrer">
-                    {pledged777.address.slice(0, 8)}…
+                     target="_blank" rel="noreferrer">
+                    {pledged777.address.slice(0, 10)}…
                   </a>
                 </strong>
                 <span>Contract</span>
@@ -81,7 +72,7 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Right column */}
+          {/* Right */}
           <aside className="heroRight">
             <PledgeConsole />
           </aside>

@@ -1,14 +1,12 @@
 import { pledged777 } from "./contract";
 
+// ASCII-only message — avoids UTF-8 encoding edge cases across wallets
 export function buildPledgeMessage(address: string): string {
   return [
-    "PLEDGED 777 — Ritual Testnet Genesis",
-    "",
+    "PLEDGED 777 - Ritual Testnet Genesis",
     `Wallet: ${address}`,
     `Contract: ${pledged777.address}`,
-    `Chain: ${pledged777.chainName} (${pledged777.chainId})`,
-    "",
-    "I am claiming my permanent on-chain slot.",
-    "This signature authorizes the relayer to write my pledge to the blockchain.",
+    `Chain: Ritual Testnet (${pledged777.chainId})`,
+    "Claiming my permanent on-chain slot.",
   ].join("\n");
 }
