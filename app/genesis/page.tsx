@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { createPublicClient, http } from "viem";
 import Footer from "../Footer";
 import { pledged777, pledged777Abi } from "@/lib/contract";

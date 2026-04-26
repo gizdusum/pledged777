@@ -81,26 +81,28 @@ a:hover { color: var(--green-hi); }
 .navLinks a:hover { color: var(--green); }
 
 /* ────────────────────────────────────────────
-   HERO MAIN — fills remaining height
+   HERO MAIN
 ──────────────────────────────────────────── */
 .heroMain {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
 }
 
 .hero {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 48px;
+  grid-template-columns: 1fr 380px;
+  gap: 56px;
   align-items: center;
-  padding: 28px 0 24px;
+  padding: 40px 0 36px;
 }
 
 .heroLeft {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
 }
 
 /* ────────────────────────────────────────────
@@ -108,8 +110,8 @@ a:hover { color: var(--green-hi); }
 ──────────────────────────────────────────── */
 .matrixLogoWrap {
   position: relative;
-  width: 220px;
-  height: 220px;
+  width: 300px;
+  height: 300px;
   flex-shrink: 0;
 }
 
@@ -124,7 +126,7 @@ a:hover { color: var(--green-hi); }
 
 .matrixLogoInner {
   position: absolute;
-  inset: 28px;
+  inset: 34px;
   border: 1px solid var(--border-hi);
   overflow: hidden;
   box-shadow: var(--glow-sm);
@@ -143,26 +145,45 @@ a:hover { color: var(--green-hi); }
 .heroText {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+}
+
+@keyframes gradientTravel {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 .heroTitle {
   margin: 0;
-  font-size: clamp(3.8rem, 7vw, 6.4rem);
+  font-size: clamp(3.8rem, 6.5vw, 6rem);
   font-weight: 900;
-  line-height: 0.9;
-  letter-spacing: -0.025em;
-  color: var(--green);
-  text-shadow: var(--glow-md);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  background: linear-gradient(
+    90deg,
+    var(--green-lo)  0%,
+    var(--green)     18%,
+    var(--green-hi)  35%,
+    #aaefca          48%,
+    var(--green-hi)  61%,
+    var(--green)     78%,
+    var(--green-lo)  100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientTravel 3.5s linear infinite;
 }
 
 .heroSub {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   color: var(--muted);
   letter-spacing: 0.02em;
-  line-height: 1.5;
-  max-width: 380px;
+  line-height: 1.55;
+  max-width: 400px;
 }
 
 /* ────────────────────────────────────────────
@@ -214,16 +235,70 @@ a:hover { color: var(--green-hi); }
 }
 
 /* ────────────────────────────────────────────
+   FEATURES
+──────────────────────────────────────────── */
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-top: none;
+  margin-bottom: 48px;
+}
+
+.featureBox {
+  background: var(--bg2);
+  padding: 26px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  transition: background 0.18s;
+}
+.featureBox:hover { background: var(--bg3); }
+
+.featureIcon {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--green-lo);
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 3px 9px;
+  background: rgba(77,170,104,0.05);
+}
+
+.featureBox strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--green-hi);
+  letter-spacing: 0.01em;
+}
+
+.featureBox p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ────────────────────────────────────────────
    PLEDGE CONSOLE
 ──────────────────────────────────────────── */
 .console {
   flex: 1;
-  border: 1px solid var(--border);
-  background: var(--bg2);
-  padding: 22px;
+  border: 1px solid var(--border-hi);
+  border-top: 2px solid var(--green-lo);
+  background: var(--bg3);
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(77,170,104,0.08);
 }
 
 .consoleTitle {
@@ -245,7 +320,7 @@ a:hover { color: var(--green-hi); }
 
 .inputField {
   width: 100%;
-  background: var(--bg3);
+  background: var(--bg2);
   border: 1px solid var(--border);
   color: var(--green);
   font: inherit;
@@ -292,7 +367,7 @@ a:hover { color: var(--green-hi); }
 .receipt {
   padding: 12px;
   border: 1px solid var(--border);
-  background: var(--bg3);
+  background: var(--bg2);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -602,23 +677,27 @@ a:hover { color: var(--green-hi); }
 /* ────────────────────────────────────────────
    RESPONSIVE
 ──────────────────────────────────────────── */
-@media (max-width: 900px) {
+@media (max-width: 980px) {
   .hero {
     grid-template-columns: 1fr;
-    padding: 28px 0 24px;
-    gap: 28px;
+    padding: 32px 0 28px;
+    gap: 32px;
   }
-  .heroMain { align-items: flex-start; }
+  .heroMain { justify-content: flex-start; }
   .heroRight { align-self: auto; }
-  .matrixLogoWrap { width: 160px; height: 160px; }
+  .matrixLogoWrap { width: 220px; height: 220px; }
   .navLinks { display: none; }
   .chainHero { grid-template-columns: 1fr; }
   .chainRow  { grid-template-columns: 1fr; }
+  .features  { grid-template-columns: 1fr; }
+  .heroTitle { white-space: normal; }
 }
 
 @media (max-width: 560px) {
   .shell { width: calc(100% - 28px); }
   .genesisGrid, .emptySlots { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
   .chainStatBlock.center { border-left: none; border-right: none; }
-  .heroTitle { font-size: clamp(3rem, 13vw, 4.5rem); }
+  .heroTitle { font-size: clamp(2.8rem, 12vw, 4.2rem); }
+  .matrixLogoWrap { width: 180px; height: 180px; }
+  .features { grid-template-columns: 1fr; }
 }

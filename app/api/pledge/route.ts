@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     // --- Relayer key ---
-    const rawKey = process.env.RELAYER_PRIVATE_KEY ?? process.env.PRIVATE_KEY;
+    const rawKey = (process.env.RELAYER_PRIVATE_KEY ?? process.env.PRIVATE_KEY ?? "").trim();
     if (!rawKey) {
       return NextResponse.json({ error: "Relayer not configured." }, { status: 503 });
     }

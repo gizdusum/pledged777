@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { createPublicClient, http } from "viem";
 import PledgeConsole from "./PledgeConsole";
 import MatrixLogo from "./MatrixLogo";
@@ -45,7 +47,7 @@ export default async function Home() {
             <MatrixLogo />
 
             <div className="heroText">
-              <h1 className="heroTitle">777<br />Pledges.</h1>
+              <h1 className="heroTitle">777 Pledges.</h1>
               <p className="heroSub">Promised and bound to the Ritual chain. Forever.</p>
             </div>
 
@@ -77,6 +79,24 @@ export default async function Home() {
             <PledgeConsole />
           </aside>
         </section>
+
+        <div className="features">
+          <div className="featureBox">
+            <span className="featureIcon">0 GAS</span>
+            <strong>No Gas Required</strong>
+            <p>The relayer pays all fees. You need zero RITUAL tokens to claim your slot.</p>
+          </div>
+          <div className="featureBox">
+            <span className="featureIcon">ON-CHAIN</span>
+            <strong>Permanent On-Chain</strong>
+            <p>Your pledge, image, and message are stored on Ritual Testnet. No IPFS, no servers.</p>
+          </div>
+          <div className="featureBox">
+            <span className="featureIcon">777</span>
+            <strong>777. Always.</strong>
+            <p>Exactly 777 slots. One per wallet. No exceptions, no extensions, no second chances.</p>
+          </div>
+        </div>
       </main>
 
       <Footer />

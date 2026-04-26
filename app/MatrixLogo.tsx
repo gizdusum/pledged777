@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 
 const CHARS = "01アイウエオカキクケコサシスセソ777RITUAL";
-const SIZE = 220;
+const SIZE = 300;
 const FS = 13;
 const COLS = Math.floor(SIZE / FS);
 
