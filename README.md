@@ -6,7 +6,8 @@
 
 A permanent on-chain registry for 777 wallets on [Ritual Testnet](https://ritualfoundation.org). Each wallet connects, uploads an image, writes a message — and the relayer submits it to the blockchain. Your wallet address, image, and message live on Ritual Testnet forever as an ERC-721 NFT.
 
-**Live:** [pledged777.vercel.app](https://pledged777.vercel.app)
+**Live:** [pledged777.xyz](https://pledged777.xyz)  
+**Twitter:** [@pledged777](https://x.com/pledged777)
 
 ---
 
