@@ -48,7 +48,7 @@ export default async function Home() {
 
             <div className="heroText">
               <h1 className="heroTitle">777 Pledges.</h1>
-              <p className="heroSub">Promised and bound to the Ritual chain. Forever.</p>
+              <p className="heroSub" style={{ whiteSpace: "nowrap" }}>Bound to the Ritual Chain. Forever.</p>
             </div>
 
             <div className="heroMeta">
