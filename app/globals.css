@@ -106,37 +106,72 @@ a:hover { color: var(--green-hi); }
 }
 
 /* ────────────────────────────────────────────
-   MATRIX LOGO
+   LOGO
 ──────────────────────────────────────────── */
-.matrixLogoWrap {
+@keyframes logoGlow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 14px rgba(80, 220, 110, 0.55))
+      drop-shadow(0 0 40px rgba(60, 180, 90, 0.22))
+      hue-rotate(0deg);
+  }
+  25% {
+    filter:
+      drop-shadow(0 0 22px rgba(100, 255, 130, 0.80))
+      drop-shadow(0 0 60px rgba(60, 200, 100, 0.35))
+      hue-rotate(22deg);
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 28px rgba(60, 230, 160, 0.70))
+      drop-shadow(0 0 70px rgba(40, 180, 120, 0.30))
+      hue-rotate(38deg);
+  }
+  75% {
+    filter:
+      drop-shadow(0 0 18px rgba(100, 255, 110, 0.75))
+      drop-shadow(0 0 50px rgba(60, 200, 90, 0.30))
+      hue-rotate(14deg);
+  }
+}
+
+@keyframes logoBreath {
+  0%, 100% { transform: scale(1);    }
+  50%       { transform: scale(1.02); }
+}
+
+.logoWrap {
   position: relative;
   width: 300px;
   height: 300px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.matrixCanvas {
+.logoRingOuter {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
+  inset: -10px;
   border: 1px solid var(--border);
+  border-radius: 2px;
+  animation: logoBreath 4s ease-in-out infinite;
 }
 
-.matrixLogoInner {
+.logoRingInner {
   position: absolute;
-  inset: 34px;
+  inset: -4px;
   border: 1px solid var(--border-hi);
-  overflow: hidden;
-  box-shadow: var(--glow-sm);
+  border-radius: 1px;
+  animation: logoBreath 4s ease-in-out infinite reverse;
 }
 
-.matrixLogoImg {
+.logoImg {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  animation: logoGlow 5s ease-in-out infinite, logoBreath 4s ease-in-out infinite;
 }
 
 /* ────────────────────────────────────────────
@@ -685,7 +720,7 @@ a:hover { color: var(--green-hi); }
   }
   .heroMain { justify-content: flex-start; }
   .heroRight { align-self: auto; }
-  .matrixLogoWrap { width: 220px; height: 220px; }
+  .logoWrap { width: 220px; height: 220px; }
   .navLinks { display: none; }
   .chainHero { grid-template-columns: 1fr; }
   .chainRow  { grid-template-columns: 1fr; }
@@ -698,6 +733,6 @@ a:hover { color: var(--green-hi); }
   .genesisGrid, .emptySlots { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
   .chainStatBlock.center { border-left: none; border-right: none; }
   .heroTitle { font-size: clamp(2.8rem, 12vw, 4.2rem); }
-  .matrixLogoWrap { width: 180px; height: 180px; }
+  .logoWrap { width: 180px; height: 180px; }
   .features { grid-template-columns: 1fr; }
 }

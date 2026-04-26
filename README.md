@@ -1,6 +1,10 @@
 # Pledged 777 — Ritual Testnet Genesis Registry
 
-A permanent on-chain registry for 777 wallets on [Ritual Testnet](https://ritualfoundation.org). Each wallet connects, uploads an image, writes a message — and the relayer submits it to the blockchain. Your wallet address, image, and message live on Ritual Testnet forever.
+<p align="center">
+  <img src="public/logo.png" alt="PLEDGED 777" width="200" />
+</p>
+
+A permanent on-chain registry for 777 wallets on [Ritual Testnet](https://ritualfoundation.org). Each wallet connects, uploads an image, writes a message — and the relayer submits it to the blockchain. Your wallet address, image, and message live on Ritual Testnet forever as an ERC-721 NFT.
 
 **Live:** [pledged777.vercel.app](https://pledged777.vercel.app)
 
@@ -11,8 +15,27 @@ A permanent on-chain registry for 777 wallets on [Ritual Testnet](https://ritual
 - 777 permanent slots on Ritual Testnet (Chain ID: 1979)
 - Users connect their wallet, upload an image, and write a message (max 77 chars)
 - A relayer wallet pays gas and writes the pledge on-chain via `pledge(wallet, imageUri, message)`
-- Every participant's wallet address is permanently stored in the smart contract
+- Every participant receives an **ERC-721 NFT** (token ID = their rank) minted to their wallet address
+- The NFT's `tokenURI` is fully on-chain — base64-encoded JSON with embedded image and message
 - No test tokens required from the user — the relayer covers all gas
+
+---
+
+## On-chain Registration
+
+When a user pledges, the contract calls `_mint(wallet, rank)`, emitting an ERC-721 `Transfer(address(0) → userWallet, tokenId)` event on Ritual Testnet. This means:
+
+- The pledge is permanently tied to the user's wallet address at the contract level
+- Any explorer or indexer that reads ERC-721 Transfer events can show the user as the token holder
+- `ownerOf(rank)` always returns the pledging wallet
+- The NFT metadata (`tokenURI`) contains the user's image and message, fully on-chain, no IPFS dependency
+
+**Transaction example:**
+```
+Pledged #001 — 0x608dc1f4faf4463ace503b71682aab881ead94d7d3b982de9436ae7ece225753
+ownerOf(1)  → 0x1ed766577c8D2A68A848E555a0F2614C395Eec51
+tokenURI(1) → data:application/json;base64,...
+```
 
 ---
 
@@ -25,6 +48,7 @@ A permanent on-chain registry for 777 wallets on [Ritual Testnet](https://ritual
 | Web3 client | Viem 2 |
 | Wallet | EIP-1193 (MetaMask / any injected provider) |
 | Smart contract | Solidity 0.8.24, Foundry |
+| Token standard | ERC-721 (self-contained, no external dependencies) |
 | Chain | Ritual Testnet (Chain ID: 1979) |
 | Hosting | Vercel |
 
@@ -41,7 +65,8 @@ Users never send transactions directly. Instead:
 3. Frontend sends `{ address, signature, imageUri, message }` to `/api/pledge`
 4. API verifies the signature with viem's `verifyMessage()`
 5. API uses the relayer private key to call `pledge()` on-chain
-6. Transaction confirmed → user's wallet is permanently in the contract
+6. Contract mints ERC-721 NFT (rank = tokenId) to the user's wallet
+7. Transaction confirmed — user's wallet permanently holds their pledge NFT
 
 This means users need zero test tokens. The relayer wallet holds the RITUAL needed for gas.
 
@@ -49,19 +74,22 @@ This means users need zero test tokens. The relayer wallet holds the RITUAL need
 
 Images are stored as base64 data URIs directly on-chain inside the contract's storage.
 
-- Client-side: image is center-cropped and resized to **48×48px JPEG** (quality 0.55) using the Canvas API
-- Maximum encoded size: **1,500 characters** (~1.1KB raw) — enforced both in the API and the contract
+- Client-side: image is center-cropped and resized to **64×64px JPEG** using the Canvas API
+- Adaptive quality: tries 0.6 → 0.45 → 0.3 → 0.18 → 0.1 → 0.05 until ≤ 4,600 characters
+- Maximum encoded size: **5,000 bytes** — enforced in the contract
 - Gas cost per pledge: ~800K–1.2M gas at 1 gwei ≈ **0.001 RITUAL per tx**
 - 777 pledges total ≈ **~0.8 RITUAL** in gas
 
 ### Smart Contract: `Pledged777.sol`
 
-Deployed at: `0xFE7b56d7b5ae2e95B9c2821338A7a5ea614C50ef`
+**Active contract:** `0xB7142038aCde47288772591E9000fd1ECdFF42D7`
+
+The contract is a self-contained ERC-721 — no OpenZeppelin dependency, no proxies, no upgradability. Inline base64 assembly encoder for fully on-chain `tokenURI`.
 
 ```solidity
 struct Pledge {
     address wallet;
-    string imageUri;   // base64 data URI, max 1500 chars
+    string imageUri;   // base64 data URI, max 5000 bytes
     string message;    // max 77 chars
     uint64 pledgedAt;
     uint16 rank;
@@ -69,19 +97,19 @@ struct Pledge {
 ```
 
 Key functions:
-- `pledge(address, imageUri, message)` — `onlyOwner` (called by relayer)
-- `getPledge(rank)` — view single pledge by rank
-- `getPledges(startRank, limit)` — paginated view
+- `pledge(address, imageUri, message)` — `onlyOwner` (called by relayer); mints ERC-721 to wallet
+- `tokenURI(tokenId)` — returns fully on-chain `data:application/json;base64,...` metadata URI
+- `ownerOf(tokenId)` — returns the wallet that holds a given rank NFT
+- `getPledge(rank)` / `getPledges(startRank, limit)` — read pledge data
 - `totalPledged()` — total count
 - `hasPledged(address)` — per-wallet check
-- `transferOwnership(newOwner)` — transfer relayer rights
 
 Constraints enforced on-chain:
-- Max 777 pledges
-- One pledge per wallet
+- Max 777 pledges (`MAX_PLEDGES = 777`)
+- One pledge per wallet (`hasPledged` mapping)
 - Message max 77 bytes
-- Image max 1500 bytes
-- Custom errors (gas-efficient): `AlreadyPledged`, `WallFull`, `MessageTooLong`, `ImageTooLarge`
+- Image max 5,000 bytes
+- Custom errors (gas-efficient): `AlreadyPledged`, `WallFull`, `MessageTooLong`, `ImageTooLarge`, `NotOwner`, `InvalidWallet`
 
 ---
 
@@ -89,7 +117,7 @@ Constraints enforced on-chain:
 
 | Route | Description |
 |---|---|
-| `/` | Landing page — pledge console + live pledge count + recent pledges |
+| `/` | Landing page — pledge console + live pledge count |
 | `/genesis` | Full genesis list — all pledged wallets with image, message, date |
 | `/chain` | Ritual Testnet status — live block number, gas price, MetaMask setup guide |
 
@@ -123,28 +151,14 @@ Validates signature and submits the pledge on-chain.
 
 Returns live Ritual Testnet stats via JSON-RPC.
 
-**Response:**
-```json
-{
-  "blockNumber": 10971077,
-  "gasPriceGwei": "1.0000",
-  "chainId": 1979
-}
-```
-
 ---
 
 ## Local Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Create .env.local
 cp .env.example .env.local
 # Fill in RELAYER_PRIVATE_KEY and RITUAL_RPC_URL
-
-# Run dev server
 npm run dev
 ```
 
@@ -159,7 +173,6 @@ RITUAL_RPC_URL=https://rpc.ritualfoundation.org
 ## Contract Deployment
 
 ```bash
-# Requires Foundry
 forge build
 
 RELAYER_PRIVATE_KEY=0x... forge script script/DeployPledged777.s.sol:DeployPledged777 \
