@@ -40,8 +40,8 @@ export async function POST(request: Request) {
   if (Buffer.byteLength(message, "utf8") > 77) {
     return NextResponse.json({ error: "Message exceeds 77 characters." }, { status: 400 });
   }
-  if (Buffer.byteLength(imageUri, "utf8") > 1500) {
-    return NextResponse.json({ error: "Image data too large." }, { status: 400 });
+  if (Buffer.byteLength(imageUri, "utf8") > 4800) {
+    return NextResponse.json({ error: "Image data too large. Try a smaller or lower-quality image." }, { status: 400 });
   }
 
   const pledgeMsg = buildPledgeMessage(address);

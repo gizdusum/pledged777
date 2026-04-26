@@ -46,7 +46,7 @@ contract Pledged777 {
         if (hasPledged[wallet]) revert AlreadyPledged();
         if (totalPledged >= MAX_PLEDGES) revert WallFull();
         if (bytes(message).length > 77) revert MessageTooLong();
-        if (bytes(imageUri).length > 1500) revert ImageTooLarge();
+        if (bytes(imageUri).length > 5000) revert ImageTooLarge();
 
         uint256 rank = totalPledged + 1;
         totalPledged = rank;

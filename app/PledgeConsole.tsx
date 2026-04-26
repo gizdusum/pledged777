@@ -3,14 +3,14 @@
 import { useCallback, useRef, useState } from "react";
 import { buildPledgeMessage } from "@/lib/pledge";
 
+const MAX_CHARS = 4600;
+
 type EIP1193 = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 };
 
 declare global {
-  interface Window {
-    ethereum?: EIP1193;
-  }
+  interface Window { ethereum?: EIP1193; }
 }
 
 async function resizeToBase64(file: File): Promise<string> {
@@ -19,91 +19,81 @@ async function resizeToBase64(file: File): Promise<string> {
     const img = new Image();
     img.onload = () => {
       URL.revokeObjectURL(url);
+      const SIZE = 64;
       const canvas = document.createElement("canvas");
-      canvas.width = 48;
-      canvas.height = 48;
+      canvas.width = SIZE;
+      canvas.height = SIZE;
       const ctx = canvas.getContext("2d");
       if (!ctx) return reject(new Error("Canvas not supported"));
       const s = Math.min(img.width, img.height);
       const sx = (img.width - s) / 2;
       const sy = (img.height - s) / 2;
-      ctx.drawImage(img, sx, sy, s, s, 0, 0, 48, 48);
-      resolve(canvas.toDataURL("image/jpeg", 0.55));
+      ctx.drawImage(img, sx, sy, s, s, 0, 0, SIZE, SIZE);
+
+      // Adaptive quality — find the first that fits under MAX_CHARS
+      for (const q of [0.6, 0.45, 0.3, 0.18, 0.1, 0.05]) {
+        const uri = canvas.toDataURL("image/jpeg", q);
+        if (uri.length <= MAX_CHARS) { resolve(uri); return; }
+      }
+      reject(new Error("Could not compress image small enough. Try a different image."));
     };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image load failed")); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image load failed.")); };
     img.src = url;
   });
 }
 
 function truncate(addr: string) {
-  return addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "";
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
 type Status = { text: string; kind: "idle" | "ok" | "err" };
 
 export default function PledgeConsole() {
-  const [address, setAddress] = useState<string>("");
-  const [imageUri, setImageUri] = useState<string>("");
-  const [message, setMessage] = useState<string>("");
-  const [status, setStatus] = useState<Status>({ text: "Connect your wallet to begin.", kind: "idle" });
-  const [txHash, setTxHash] = useState<string>("");
-  const [txUrl, setTxUrl] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [address, setAddress]   = useState("");
+  const [imageUri, setImageUri] = useState("");
+  const [message, setMessage]   = useState("");
+  const [status, setStatus]     = useState<Status>({ text: "Connect your wallet to begin.", kind: "idle" });
+  const [txHash, setTxHash]     = useState("");
+  const [txUrl, setTxUrl]       = useState("");
+  const [loading, setLoading]   = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const setErr = (text: string) => setStatus({ text, kind: "err" });
-  const setOk = (text: string) => setStatus({ text, kind: "ok" });
-  const setIdle = (text: string) => setStatus({ text, kind: "idle" });
+  const setErr  = (t: string) => setStatus({ text: t, kind: "err" });
+  const setOk   = (t: string) => setStatus({ text: t, kind: "ok" });
+  const setIdle = (t: string) => setStatus({ text: t, kind: "idle" });
 
   const connectWallet = useCallback(async () => {
-    if (!window.ethereum) {
-      setErr("No wallet detected. Install MetaMask or a compatible wallet.");
-      return;
-    }
+    if (!window.ethereum) { setErr("No wallet detected. Install MetaMask."); return; }
     try {
       setLoading(true);
-      const accounts = (await window.ethereum.request({
-        method: "eth_requestAccounts",
-      })) as string[];
+      const accounts = (await window.ethereum.request({ method: "eth_requestAccounts" })) as string[];
       if (!accounts[0]) throw new Error("No account returned.");
       setAddress(accounts[0]);
       setOk(`Connected: ${truncate(accounts[0])}`);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Connection failed.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }, []);
 
   const handleFile = useCallback(async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      setErr("Only image files are accepted.");
-      return;
-    }
+    if (!file.type.startsWith("image/")) { setErr("Only image files are accepted."); return; }
     try {
-      setIdle("Resizing image...");
+      setIdle("Processing image...");
       const uri = await resizeToBase64(file);
       setImageUri(uri);
       setIdle("Image ready. Write your message.");
-    } catch {
-      setErr("Could not process image.");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Could not process image.");
     }
   }, []);
 
   const handleFilePick = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) handleFile(file);
-    },
+    (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); },
     [handleFile]
   );
 
   const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      const file = e.dataTransfer.files?.[0];
-      if (file) handleFile(file);
-    },
+    (e: React.DragEvent) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); },
     [handleFile]
   );
 
@@ -115,24 +105,19 @@ export default function PledgeConsole() {
 
     setLoading(true);
     setIdle("Requesting signature...");
-
     try {
-      const provider = window.ethereum!;
-      const pledgeMsg = buildPledgeMessage(address);
-      const sig = (await provider.request({
+      const sig = (await window.ethereum!.request({
         method: "personal_sign",
-        params: [pledgeMsg, address],
+        params: [buildPledgeMessage(address), address],
       })) as string;
 
-      setIdle("Signature received. Sending to relayer...");
-
+      setIdle("Submitting to relayer...");
       const res = await fetch("/api/pledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address, signature: sig, imageUri, message }),
       });
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error ?? "Relayer error.");
 
       setTxHash(data.txHash);
@@ -140,13 +125,11 @@ export default function PledgeConsole() {
       setOk("Pledge confirmed on Ritual Testnet.");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }, [address, imageUri, message]);
 
   const charLeft = 77 - message.length;
-  const charClass = charLeft < 0 ? "charCount over" : charLeft < 15 ? "charCount warn" : "charCount";
+  const charCls  = charLeft < 0 ? "charCount over" : charLeft < 15 ? "charCount warn" : "charCount";
 
   if (txHash) {
     return (
@@ -155,11 +138,9 @@ export default function PledgeConsole() {
         <div className="receipt">
           <span>Transaction Hash</span>
           <a href={txUrl} target="_blank" rel="noreferrer">{txHash}</a>
-          <span style={{ marginTop: 8 }}>Your wallet is now permanently on Ritual Testnet.</span>
+          <span style={{ marginTop: 6 }}>Permanently stored on Ritual Testnet.</span>
         </div>
-        <a className="btn" href={txUrl} target="_blank" rel="noreferrer" style={{ fontSize: "0.78rem" }}>
-          View on Explorer →
-        </a>
+        <a className="btn" href={txUrl} target="_blank" rel="noreferrer">View on Explorer →</a>
       </div>
     );
   }
@@ -168,9 +149,10 @@ export default function PledgeConsole() {
     <div className="console">
       <p className="consoleTitle">// claim your slot</p>
 
+      {/* Step 1: Connect */}
       <div className="step">
         <p className={"stepLabel" + (address ? " done" : "")}>
-          {address ? ("✓ " + truncate(address)) : "01 — Connect Wallet"}
+          {address ? `✓ ${truncate(address)}` : "01 — Connect Wallet"}
         </p>
         {!address && (
           <button className="btnSolid btn" onClick={connectWallet} disabled={loading}>
@@ -179,6 +161,7 @@ export default function PledgeConsole() {
         )}
       </div>
 
+      {/* Step 2: Image */}
       {address && (
         <div className="step">
           <p className={"stepLabel" + (imageUri ? " done" : "")}>
@@ -187,57 +170,41 @@ export default function PledgeConsole() {
           {imageUri ? (
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <img src={imageUri} alt="preview" className="imagePreview" />
-              <button className="btn" style={{ fontSize: "0.78rem" }} onClick={() => { setImageUri(""); if (fileRef.current) fileRef.current.value = ""; }}>
+              <button className="btn" style={{ fontSize: "0.76rem" }}
+                onClick={() => { setImageUri(""); if (fileRef.current) fileRef.current.value = ""; }}>
                 Change
               </button>
             </div>
           ) : (
             <>
-              <button
-                className="imageUploadArea"
-                onClick={() => fileRef.current?.click()}
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-              >
-                Drop image here or click to upload
+              <button className="imageUploadArea" onClick={() => fileRef.current?.click()}
+                onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
+                Drop image or click to upload
                 <br />
-                <span style={{ fontSize: "0.72rem", opacity: 0.6 }}>Resized to 48x48px · stored on-chain</span>
+                <span style={{ fontSize: "0.68rem", opacity: 0.55 }}>Auto-compressed · stored on-chain</span>
               </button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleFilePick}
-              />
+              <input ref={fileRef} type="file" accept="image/*"
+                style={{ display: "none" }} onChange={handleFilePick} />
             </>
           )}
         </div>
       )}
 
+      {/* Step 3: Message */}
       {address && imageUri && (
         <div className="step">
-          <p className={"stepLabel" + (message.trim() ? " done" : "")}>
-            03 — Your Message
-          </p>
-          <textarea
-            className="inputField"
-            rows={2}
-            maxLength={80}
+          <p className={"stepLabel" + (message.trim() ? " done" : "")}>03 — Your Message</p>
+          <textarea className="inputField" rows={2} maxLength={80}
             placeholder="Leave your mark... (77 chars max)"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <p className={charClass}>{charLeft} chars left</p>
+            value={message} onChange={(e) => setMessage(e.target.value)} />
+          <p className={charCls}>{charLeft} chars left</p>
         </div>
       )}
 
+      {/* Submit */}
       {address && imageUri && (
-        <button
-          className="btnSolid btn"
-          onClick={submitPledge}
-          disabled={loading || !message.trim() || message.length > 77}
-        >
+        <button className="btnSolid btn" onClick={submitPledge}
+          disabled={loading || !message.trim() || message.length > 77}>
           {loading ? "Processing..." : "Sign & Pledge On-Chain"}
         </button>
       )}

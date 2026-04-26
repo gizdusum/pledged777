@@ -11,7 +11,7 @@ const ritualChain = {
   rpcUrls: { default: { http: [pledged777.rpcUrl] } },
 } as const;
 
-async function fetchRecentPledges() {
+async function fetchStats() {
   try {
     const client = createPublicClient({ chain: ritualChain, transport: http() });
     const total = await client.readContract({
@@ -19,28 +19,12 @@ async function fetchRecentPledges() {
       abi: pledged777Abi,
       functionName: "totalPledged",
     });
-    const count = Number(total);
-    if (count === 0) return { total: 0, recent: [] };
-    const startRank = Math.max(1, count - 4);
-    const limit = count - startRank + 1;
-    const pledges = await client.readContract({
-      address: pledged777.address as `0x${string}`,
-      abi: pledged777Abi,
-      functionName: "getPledges",
-      args: [BigInt(startRank), BigInt(limit)],
-    });
-    return { total: count, recent: [...pledges].reverse() };
-  } catch {
-    return { total: 0, recent: [] };
-  }
-}
-
-function shortenAddr(addr: string) {
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+    return Number(total);
+  } catch { return 0; }
 }
 
 export default async function Home() {
-  const { total, recent } = await fetchRecentPledges();
+  const total = await fetchStats();
   const remaining = pledged777.maxPledges - total;
 
   return (
@@ -54,67 +38,51 @@ export default async function Home() {
         </ul>
       </nav>
 
-      <main>
+      <main className="heroMain">
         <section className="hero">
+          {/* Left column */}
           <div className="heroLeft">
             <div className="logoWrap">
               <Image src="/logo.jpg" alt="Pledged 777" fill className="logoImg" priority />
             </div>
 
-            <span className="label">Ritual Testnet · Chain {pledged777.chainId}</span>
-            <h1>777<br />on-chain<br />pledges.</h1>
-            <p className="lede">
-              Connect your wallet, upload an image, leave a message.
-              The relayer writes it permanently to Ritual Testnet —
-              your wallet lives on the blockchain forever.
-            </p>
+            <h1>
+              777 Pledges.<br />
+              Promised and Bound<br />
+              to the Ritual Chain<br />
+              Forever.
+            </h1>
 
-            <div className="statsGrid">
-              <div className="statCell">
+            <div className="heroStats">
+              <div className="heroStat">
+                <strong>{total}</strong>
                 <span>Pledged</span>
-                <strong className="big">{total}</strong>
               </div>
-              <div className="statCell">
+              <div className="heroStatDiv" />
+              <div className="heroStat">
+                <strong>{remaining}</strong>
                 <span>Remaining</span>
-                <strong className="big">{remaining}</strong>
               </div>
-              <div className="statCell">
-                <span>Network</span>
+              <div className="heroStatDiv" />
+              <div className="heroStat">
                 <strong>Ritual Testnet</strong>
+                <span>Network</span>
               </div>
-              <div className="statCell">
-                <span>Contract</span>
+              <div className="heroStatDiv" />
+              <div className="heroStat">
                 <strong>
-                  <a href={`${pledged777.explorerUrl}/address/${pledged777.address}`} target="_blank" rel="noreferrer">
-                    {pledged777.address.slice(0, 10)}…
+                  <a href={`${pledged777.explorerUrl}/address/${pledged777.address}`}
+                    target="_blank" rel="noreferrer">
+                    {pledged777.address.slice(0, 8)}…
                   </a>
                 </strong>
+                <span>Contract</span>
               </div>
             </div>
-
-            {recent.length > 0 && (
-              <>
-                <p className="recentTitle">// recent pledges</p>
-                {recent.map((p) => (
-                  <div className="pledgeRow" key={p.rank}>
-                    <span className="pledgeRank">#{String(p.rank).padStart(3, "0")}</span>
-                    {p.imageUri ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.imageUri} alt="" className="pledgeThumb" />
-                    ) : (
-                      <div className="pledgeThumb" style={{ background: "var(--bg3)", display: "grid", placeItems: "center", color: "var(--dim)", fontSize: "0.7rem" }}>?</div>
-                    )}
-                    <div className="pledgeInfo">
-                      <p className="pledgeWallet">{shortenAddr(p.wallet)}</p>
-                      <p className="pledgeMsg">{p.message || "—"}</p>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
           </div>
 
-          <aside>
+          {/* Right column */}
+          <aside className="heroRight">
             <PledgeConsole />
           </aside>
         </section>

@@ -6,7 +6,7 @@ export const pledged777 = {
   explorerUrl: "https://explorer.ritualfoundation.org",
   faucetUrl: "https://faucet.ritualfoundation.org",
   docsUrl: "https://docs.ritualfoundation.org",
-  address: "0xFE7b56d7b5ae2e95B9c2821338A7a5ea614C50ef",
+  address: "0x6679ba59504A9F1AE0977270daB11e6077046425",
   maxPledges: 777,
 } as const;
 
