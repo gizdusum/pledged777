@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { createPublicClient, http } from "viem";
 import Footer from "../Footer";
+import Nav from "../Nav";
 import { pledged777, pledged777Abi } from "@/lib/contract";
 
 const ritualChain = {
@@ -51,14 +52,7 @@ export default async function GenesisPage() {
 
   return (
     <div className="shell">
-      <nav className="nav">
-        <span className="navBrand"><a href="/">PLEDGED 777</a></span>
-        <ul className="navLinks">
-          <li><a href="/genesis">Genesis List</a></li>
-          <li><a href="/chain">Chain</a></li>
-          <li><a href={pledged777.explorerUrl} target="_blank" rel="noreferrer">Explorer</a></li>
-        </ul>
-      </nav>
+      <Nav />
 
       <main>
         <div className="genesisHeader">
@@ -78,7 +72,10 @@ export default async function GenesisPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.imageUri} alt="" className="cardImg" />
                 ) : (
-                  <div className="cardImg" style={{ background: "var(--bg3)", display: "grid", placeItems: "center", color: "var(--dim)", fontSize: "1.5rem" }}>?</div>
+                  <div
+                    className="cardImg"
+                    style={{ background: "var(--bg3)", display: "grid", placeItems: "center", color: "var(--text-dim)", fontSize: "1.5rem" }}
+                  >?</div>
                 )}
                 <p className="cardWallet">
                   <a href={`${pledged777.explorerUrl}/address/${p.wallet}`} target="_blank" rel="noreferrer">
@@ -93,7 +90,9 @@ export default async function GenesisPage() {
         ) : (
           <div className="empty">
             <p>No pledges yet. Be the first.</p>
-            <a className="btn" href="/" style={{ display: "inline-flex", marginTop: 16 }}>Pledge Now →</a>
+            <a className="btn btnSolid" href="/" style={{ display: "inline-flex", marginTop: 20 }}>
+              Claim a Slot →
+            </a>
           </div>
         )}
 

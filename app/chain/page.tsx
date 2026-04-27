@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Footer from "../Footer";
+import Nav from "../Nav";
 import { pledged777 } from "@/lib/contract";
 
 type Stats = {
@@ -32,21 +33,13 @@ export default function ChainPage() {
 
   return (
     <div className="shell">
-      <nav className="nav">
-        <span className="navBrand"><a href="/">PLEDGED 777</a></span>
-        <ul className="navLinks">
-          <li><a href="/genesis">Genesis List</a></li>
-          <li><a href="/chain">Chain</a></li>
-          <li><a href={pledged777.explorerUrl} target="_blank" rel="noreferrer">Explorer</a></li>
-        </ul>
-      </nav>
+      <Nav />
 
       <main>
         <div className="chainPage">
           <span className="label">Ritual Testnet · Chain ID 1979</span>
-          <h2 style={{ marginBottom: 32 }}>Chain Status</h2>
+          <h2>Chain Status</h2>
 
-          {/* Live stats row */}
           <div className="chainHero">
             <div className="chainStatBlock">
               <div className="liveBadge"><span className="liveDot" />Live</div>
@@ -65,16 +58,15 @@ export default function ChainPage() {
             </div>
 
             <div className="chainStatBlock">
-              <div className="liveBadge" style={{ opacity: 0.5 }}>Static</div>
+              <div className="liveBadge" style={{ opacity: 0.45 }}>Static</div>
               <div className="chainBigNum">1979</div>
               <div className="chainLabel">Chain ID</div>
             </div>
           </div>
 
-          {/* Network info + Links */}
           <div className="chainRow">
             <div className="chainCard">
-              <h3>Network</h3>
+              <h3>Network Details</h3>
               <div className="codeBlock">{`Name     Ritual Testnet
 RPC      rpc.ritualfoundation.org
 Symbol   RITUAL
@@ -108,7 +100,6 @@ ChainID  1979  (0x7BB)`}</div>
             </div>
           </div>
 
-          {/* MetaMask setup */}
           <div className="chainCard">
             <h3>Add to MetaMask</h3>
             <div className="mmSteps">
@@ -126,9 +117,14 @@ RPC URL        https://rpc.ritualfoundation.org
 Chain ID       1979
 Symbol         RITUAL
 Explorer       https://explorer.ritualfoundation.org`}</div>
-            <div className="mmStep" style={{ borderTop: "1px solid var(--border)", paddingTop: 10, marginTop: 4 }}>
+            <div className="mmStep" style={{ borderTop: "1px solid var(--border)", paddingTop: 12, marginTop: 4 }}>
               <span className="mmStepN">03</span>
-              <span>Get test tokens from the <a href={pledged777.faucetUrl} target="_blank" rel="noreferrer" style={{ color: "var(--green)" }}>faucet ↗</a></span>
+              <span>
+                Get test tokens from the{" "}
+                <a href={pledged777.faucetUrl} target="_blank" rel="noreferrer">
+                  faucet ↗
+                </a>
+              </span>
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { createPublicClient, http } from "viem";
 import PledgeConsole from "./PledgeConsole";
 import MatrixLogo from "./MatrixLogo";
 import Footer from "./Footer";
+import Nav from "./Nav";
 import { pledged777, pledged777Abi } from "@/lib/contract";
 
 const ritualChain = {
@@ -28,27 +29,33 @@ async function fetchTotal() {
 export default async function Home() {
   const total = await fetchTotal();
   const remaining = pledged777.maxPledges - total;
+  const pct = Math.round((total / pledged777.maxPledges) * 100);
 
   return (
     <div className="shell">
-      <nav className="nav">
-        <span className="navBrand">PLEDGED 777</span>
-        <ul className="navLinks">
-          <li><a href="/genesis">Genesis List</a></li>
-          <li><a href="/chain">Chain</a></li>
-          <li><a href={pledged777.explorerUrl} target="_blank" rel="noreferrer">Explorer</a></li>
-        </ul>
-      </nav>
+      <Nav />
 
       <main className="heroMain">
         <section className="hero">
-          {/* Left */}
+          {/* Left column */}
           <div className="heroLeft">
             <MatrixLogo />
 
+            <div className="heroBadge">
+              <span className="heroBadgeDot" />
+              Ritual Testnet · Genesis Registry
+            </div>
+
             <div className="heroText">
-              <h1 className="heroTitle">777 Pledges.</h1>
-              <p className="heroSub" style={{ whiteSpace: "nowrap" }}>Bound to the Ritual Chain. Forever.</p>
+              <h1 className="heroTitle">
+                777 Pledges.<br />
+                <span className="heroTitleAccent">Zero Gas.</span>
+              </h1>
+              <p className="heroSub">
+                A permanent on-chain registry on Ritual Testnet. Sign once,
+                pay nothing — the relayer covers all fees. Your wallet,
+                image, and message live on-chain forever.
+              </p>
             </div>
 
             <div className="heroMeta">
@@ -56,26 +63,36 @@ export default async function Home() {
                 <strong>{total}</strong>
                 <span>Pledged</span>
               </div>
-              <div className="metaDot" />
               <div className="metaItem">
                 <strong>{remaining}</strong>
-                <span>Open</span>
+                <span>Remaining</span>
               </div>
-              <div className="metaDot" />
+              <div className="metaItem">
+                <strong>{pct}%</strong>
+                <span>Filled</span>
+              </div>
               <div className="metaItem">
                 <strong>
-                  <a href={`${pledged777.explorerUrl}/address/${pledged777.address}`}
-                     target="_blank" rel="noreferrer">
-                    {pledged777.address.slice(0, 10)}…
+                  <a
+                    href={`${pledged777.explorerUrl}/address/${pledged777.address}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {pledged777.address.slice(0, 8)}…
                   </a>
                 </strong>
                 <span>Contract</span>
               </div>
             </div>
+
+            <div className="heroActions">
+              <a className="btn btnSolid" href="/#pledge">Claim Your Slot</a>
+              <a className="btn" href="/how-it-works">How it Works →</a>
+            </div>
           </div>
 
-          {/* Right */}
-          <aside className="heroRight">
+          {/* Right column — pledge console */}
+          <aside className="heroRight" id="pledge">
             <PledgeConsole />
           </aside>
         </section>
@@ -84,17 +101,17 @@ export default async function Home() {
           <div className="featureBox">
             <span className="featureIcon">0 GAS</span>
             <strong>No Gas Required</strong>
-            <p>The relayer pays all fees. You need zero RITUAL tokens to claim your slot.</p>
+            <p>The relayer pays all transaction fees. You need zero RITUAL tokens — just a wallet signature.</p>
           </div>
           <div className="featureBox">
             <span className="featureIcon">ON-CHAIN</span>
             <strong>Permanent On-Chain</strong>
-            <p>Your pledge, image, and message are stored on Ritual Testnet. No IPFS, no servers.</p>
+            <p>Your pledge, image, and message are stored directly on Ritual Testnet. No IPFS, no servers, no expiry.</p>
           </div>
           <div className="featureBox">
             <span className="featureIcon">777</span>
-            <strong>777. Always.</strong>
-            <p>Exactly 777 slots. One per wallet. No exceptions, no extensions, no second chances.</p>
+            <strong>Exactly 777. Always.</strong>
+            <p>Hard-coded in the contract. One slot per wallet. No extensions, no exceptions, no second chances.</p>
           </div>
         </div>
       </main>
